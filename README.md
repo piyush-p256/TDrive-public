@@ -22,6 +22,7 @@ A Google Drive / Google Photos–style web platform that uses Telegram as the ma
 - **Trash Management** - Soft delete with restore functionality
 - **Worker Templates** - Deploy your own upload worker (Cloudflare/Vercel/Render)
 - **Auto-Sync** - Telegram bot integration for real-time sync
+- **Face Recognition** - Search by people functionality like google photos.
 
 ### Technical Highlights
 - **Bandwidth Efficient** - Only metadata stored in MongoDB, files in Telegram
