@@ -1,493 +1,125 @@
-# TeleDrive - Unlimited Cloud Storage Powered by Telegram
+# TDrive - Unlimited Cloud Storage Architecture
 
-![TeleDrive](https://img.shields.io/badge/TeleStore-v1.0-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.110.1-green)
-![React](https://img.shields.io/badge/React-19.0.0-blue)
-![MongoDB](https://img.shields.io/badge/MongoDB-latest-green)
+![TDrive](https://img.shields.io/badge/System_Design-Microservices-blueviolet)
+![FastAPI](https://img.shields.io/badge/Backend-FastAPI_&_Python-green)
+![React](https://img.shields.io/badge/Frontend-React_19_&_TypeScript-blue)
+![Architecture](https://img.shields.io/badge/Storage-Telegram_MTProto-orange)
 
-A Google Drive / Google Photos–style web platform that uses Telegram as the main storage backend and Cloudinary/imgbb for thumbnails. Store unlimited files using your personal Telegram channel!
-
-## NOTE: The original repository is private. This repository is for recruiters who wish to see the live website. If you'd like to view the source code, please contact me.
-
-## 🌟 Features
-
-### Core Features
-- **Email/Password Authentication** - Secure user registration and login
-- **Telegram Integration** - Connect via QR code or phone number
-- **Automatic Channel Creation** - Private Telegram channel created automatically
-- **File Management** - Upload, rename, delete, organize files and folders
-- **Thumbnail Generation** - In-browser thumbnail creation for fast previews
-- **Dual Storage Support** - Cloudinary AND imgbb for thumbnails
-- **Public Sharing** - Generate shareable links for files
-- **Trash Management** - Soft delete with restore functionality
-- **Worker Templates** - Deploy your own upload worker (Cloudflare/Vercel/Render)
-- **Auto-Sync** - Telegram bot integration for real-time sync
-- **Face Recognition** - Search by people functionality like google photos.
-
-### Technical Highlights
-- **Bandwidth Efficient** - Only metadata stored in MongoDB, files in Telegram
-- **Direct Downloads** - Files loaded directly from Telegram CDN
-- **Scalable Architecture** - Serverless workers for uploads
-- **Modern UI** - Beautiful, responsive interface with Shadcn UI
-- **Real-time Updates** - Near-instant sync between Telegram and web
-
-## 🏗️ Architecture
-
-```
-┌─────────────┐     ┌──────────────┐     ┌────────────────┐
-│   Browser   │────▶│   Frontend   │────▶│    Backend     │
-│   (React)   │     │  (React 19)  │     │   (FastAPI)    │
-└─────────────┘     └──────────────┘     └────────────────┘
-                                                   │
-                    ┌──────────────────────────────┼──────────────┐
-                    │                              │              │
-                    ▼                              ▼              ▼
-            ┌──────────────┐            ┌──────────────┐  ┌──────────┐
-            │   MongoDB    │            │   Telegram   │  │Cloudinary│
-            │  (Metadata)  │            │   (Files)    │  │ (Thumbs) │
-            └──────────────┘            └──────────────┘  └──────────┘
-                                                │
-                                        ┌───────┴───────┐
-                                        │               │
-                                        ▼               ▼
-                                ┌──────────────┐  ┌─────────┐
-                                │    Worker    │  │   Bot   │
-                                │(CF/Vercel/R) │  │ (Sync)  │
-                                └──────────────┘  └─────────┘
-```
-
-## 📋 Prerequisites
-
-### Required
-- Python 3.11+
-- Node.js 18+
-- MongoDB
-- Telegram Account
-- Telegram API credentials (api_id, api_hash from https://my.telegram.org)
-
-### Optional (for full functionality)
-- Cloudinary account (for thumbnails)
-- ImgBB account (alternative for thumbnails)
-- Cloudflare/Vercel/Render account (for worker deployment)
-
-## 🚀 Quick Start
-
-### 1. Clone and Install
-
-```bash
-# Backend
-cd backend
-pip install -r requirements.txt
-
-# Frontend
-cd frontend
-yarn install
-```
-
-### 2. Configure Environment
-
-**Backend (.env)**
-```bash
-MONGO_URL="mongodb://localhost:27017"
-DB_NAME="telestore"
-JWT_SECRET_KEY="your-super-secret-key-here"
-
-# Get from https://my.telegram.org
-TELEGRAM_API_ID="your_api_id"
-TELEGRAM_API_HASH="your_api_hash"
-```
-
-**Frontend (.env)**
-```bash
-REACT_APP_BACKEND_URL=https://your-backend-url.com
-```
-
-### 3. Run Development Servers
-
-```bash
-# Backend (from /app/backend)
-sudo supervisorctl restart backend
-
-# Frontend (from /app/frontend)
-sudo supervisorctl restart frontend
-```
-
-### 4. Access the Application
-
-Open your browser and navigate to your frontend URL.
-
-## 📱 User Guide
-
-### Step 1: Create Account
-1. Visit the application
-2. Click "Sign Up" tab
-3. Enter email and password
-4. Click "Create Account"
-
-### Step 2: Connect Telegram
-1. Go to Settings (gear icon)
-2. Choose connection method:
-   - **QR Code**: Generate and scan with Telegram app
-   - **Phone**: Enter phone number and verification code
-3. Private channel created automatically
-4. Copy channel invite link (optional)
-
-### Step 3: Configure API Keys (Optional but Recommended)
-1. Go to Settings → Storage Keys
-2. Add Cloudinary credentials:
-   - Cloud Name
-   - API Key
-   - API Secret
-3. Or add ImgBB API Key
-4. Click "Save API Keys"
-
-### Step 4: Deploy Worker (Required for Uploads)
-
-Choose one platform:
-
-#### Option A: Cloudflare Workers
-```bash
-cd worker-templates
-# Edit cloudflare-worker.js with your credentials
-wrangler deploy
-```
-
-#### Option B: Vercel Serverless
-```bash
-cd worker-templates
-mkdir my-worker && cd my-worker
-npm init -y
-npm install form-data node-fetch
-# Copy vercel-serverless.js to api/upload.js
-vercel deploy
-```
-
-#### Option C: Render
-```bash
-cd worker-templates
-# Upload render-service.py to Render
-# Set environment variables in Render dashboard
-```
-
-See `/worker-templates/README.md` for detailed instructions.
-
-### Step 5: Upload Files
-1. Return to Dashboard
-2. Click "Upload Files"
-3. Select files to upload
-4. Thumbnails generated automatically
-5. Files uploaded to your Telegram channel
-
-### Step 6: Manage Files
-- **Create Folders**: Click "New Folder"
-- **Rename**: Click three dots → Rename
-- **Delete**: Click three dots → Delete (moves to trash)
-- **Share**: Click three dots → Share (copies link)
-- **Search**: Use search bar to find files
-
-## 🔧 API Documentation
-
-### Authentication
-
-**Sign Up**
-```http
-POST /api/auth/signup
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securepassword"
-}
-```
-
-**Login**
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securepassword"
-}
-```
-
-**Get Current User**
-```http
-GET /api/auth/me
-Authorization: Bearer <token>
-```
-
-### Telegram
-
-**Request QR Code**
-```http
-POST /api/telegram/request-qr
-Authorization: Bearer <token>
-```
-
-**Verify QR Login**
-```http
-POST /api/telegram/verify-qr
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "session_id": "uuid"
-}
-```
-
-**Request Phone Code**
-```http
-POST /api/telegram/request-code
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "phone": "+1234567890"
-}
-```
-
-**Verify Phone Code**
-```http
-POST /api/telegram/verify-code
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "phone": "+1234567890",
-  "code": "12345",
-  "phone_code_hash": "hash_from_request_code"
-}
-```
-
-### Files
-
-**List Files**
-```http
-GET /api/files?folder_id=<optional>
-Authorization: Bearer <token>
-```
-
-**Create File Metadata**
-```http
-POST /api/files
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "photo.jpg",
-  "size": 1024000,
-  "mime_type": "image/jpeg",
-  "telegram_msg_id": 123,
-  "thumbnail_url": "https://...",
-  "thumbnail_provider": "cloudinary"
-}
-```
-
-**Update File**
-```http
-PUT /api/files/{file_id}
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "new_name.jpg"
-}
-```
-
-**Delete File**
-```http
-DELETE /api/files/{file_id}?permanent=false
-Authorization: Bearer <token>
-```
-
-**Share File**
-```http
-POST /api/files/{file_id}/share
-Authorization: Bearer <token>
-```
-
-### Folders
-
-**List Folders**
-```http
-GET /api/folders?parent_id=<optional>
-Authorization: Bearer <token>
-```
-
-**Create Folder**
-```http
-POST /api/folders
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "My Folder",
-  "parent_id": null
-}
-```
-
-## 🔐 Security
-
-- **Password Hashing**: bcrypt with salt
-- **JWT Authentication**: Secure token-based auth
-- **Private Channels**: Files stored in user's private Telegram channel
-- **Session Security**: Telegram session strings encrypted
-- **CORS Protection**: Configurable origins
-- **API Key Encryption**: Stored securely in database
-
-## 🎨 UI/UX Features
-
-- **Modern Design**: Clean, professional interface
-- **Responsive**: Works on desktop, tablet, and mobile
-- **Dark Mode Ready**: Easy to implement
-- **Smooth Animations**: Polished user experience
-- **Intuitive Navigation**: Easy to use for non-technical users
-- **Toast Notifications**: Real-time feedback
-- **Loading States**: Clear progress indicators
-
-## 📦 Tech Stack
-
-### Backend
-- **FastAPI**: Modern Python web framework
-- **Motor**: Async MongoDB driver
-- **Telethon**: Telegram client library
-- **Pydantic**: Data validation
-- **JWT**: Authentication
-- **bcrypt**: Password hashing
-
-### Frontend
-- **React 19**: Latest React version
-- **React Router**: Navigation
-- **Axios**: HTTP client
-- **Shadcn UI**: Component library
-- **Tailwind CSS**: Styling
-- **Lucide React**: Icons
-- **Sonner**: Toast notifications
-
-### Database
-- **MongoDB**: NoSQL database for metadata
-
-### Storage
-- **Telegram**: Primary file storage
-- **Cloudinary**: Thumbnail storage (optional)
-- **ImgBB**: Alternative thumbnail storage (optional)
-
-## 🐛 Troubleshooting
-
-### Backend Issues
-
-**"Invalid telegram credentials"**
-- Get api_id and api_hash from https://my.telegram.org
-- Add them to backend/.env
-- Restart backend
-
-**"MongoDB connection failed"**
-- Ensure MongoDB is running
-- Check MONGO_URL in .env
-
-### Frontend Issues
-
-**"Network Error"**
-- Check REACT_APP_BACKEND_URL in frontend/.env
-- Ensure backend is running
-- Check CORS settings
-
-### Telegram Issues
-
-**"QR code expired"**
-- Generate a new QR code
-- Scan within 30 seconds
-
-**"Chat not found"**
-- Ensure bot is admin in channel
-- Channel ID should be `-100XXXXXXXXXX` format
-
-**"Session expired"**
-- Re-login to Telegram in Settings
-- Update worker with new session string
-
-### Worker Issues
-
-**"File upload failed"**
-- Check worker logs
-- Verify Telegram bot token
-- Ensure bot has admin access to channel
-- Check worker environment variables
-
-## 🚀 Deployment
-
-### Backend (Vercel/Render)
-
-**Vercel**
-```bash
-cd backend
-vercel deploy
-```
-
-**Render**
-1. Connect GitHub repo
-2. Set environment variables
-3. Deploy
-
-### Frontend (Vercel/Netlify)
-
-**Vercel**
-```bash
-cd frontend
-vercel deploy
-```
-
-**Netlify**
-```bash
-cd frontend
-netlify deploy --prod
-```
-
-### Database (MongoDB Atlas)
-
-1. Create cluster at https://cloud.mongodb.com
-2. Get connection string
-3. Update MONGO_URL in backend .env
-
-## 📝 Environment Variables Reference
-
-### Backend
-| Variable | Description | Required |
-|----------|-------------|----------|
-| MONGO_URL | MongoDB connection string | Yes |
-| DB_NAME | Database name | Yes |
-| JWT_SECRET_KEY | Secret key for JWT | Yes |
-| TELEGRAM_API_ID | Telegram API ID | Yes |
-| TELEGRAM_API_HASH | Telegram API hash | Yes |
-| CORS_ORIGINS | Allowed origins (comma-separated) | No |
-
-### Frontend
-| Variable | Description | Required |
-|----------|-------------|----------|
-| REACT_APP_BACKEND_URL | Backend API URL | Yes |
-
-### Worker
-| Variable | Description | Required |
-|----------|-------------|----------|
-| TELEGRAM_BOT_TOKEN | Bot token from @BotFather | Yes |
-| TELEGRAM_CHANNEL_ID | Private channel ID | Yes |
-| BACKEND_URL | TeleStore backend URL | Yes |
-
-
-## 🗺️ Roadmap
-
-- [ ] Telegram bot for auto-sync
-- [ ] Folder upload support
-- [ ] Bulk operations
-- [ ] File versioning
-- [ ] Collaborative sharing
-- [ ] Mobile app (React Native)
-- [ ] Desktop app (Electron)
-- [ ] End-to-end encryption
-- [ ] Search improvements
-- [ ] Analytics dashboard
+**Project Goal**: To engineer a zero-cost, unlimited cloud storage solution by reverse-engineering the Telegram MTProto API, effectively turning a messaging platform into a high-performance distributed object storage system.
 
 ---
 
-Made with ❤️ using FastAPI, React, and Telegram
+## 💡 The Engineering Challenge
+
+Standard cloud storage (S3, GCS) becomes prohibitively expensive at scale. The challenge was to build a system that offers **unlimited storage** without the associated costs, while maintaining the user experience of Google Drive.
+
+**Key Constraints & Solutions:**
+```markdown
+- **Constraint**: Telegram has file size limits and API rate limits.
+- **Solution**: Implemented a **dedicated worker architecture** that processes file transfers through a single worker instance to strictly adhere to API rate limits and maintain connection stability.
+```
+- **Constraint**: Serving large files through a backend server consumes massive bandwidth.
+- **Solution**: Developed a **direct-streaming mechanism** where the frontend streams media directly from Telegram's CDN nodes, completely bypassing the backend server for data transfer.
+
+---
+
+## 🏗️ System Architecture
+
+The system uses a **decoupled metadata architecture**. The "filesystem" structure exists only in MongoDB, while the actual data blobs are distributed across Telegram's global CDN.
+
+```mermaid
+graph TD
+    User((User))
+    
+    subgraph Frontend Logic
+        UI[React 19 SPA]
+        Stream[Stream Processor]
+    end
+    
+    subgraph Backend Coordination
+        API[FastAPI Gateway]
+        Auth[JWT Auth Service]
+        Meta[(MongoDB Cluster)]
+        Bot[Telegram Bot API]
+    end
+    
+    subgraph Storage Layer
+        Worker1[Worker (Cloudflare)]
+        Worker2[Worker (Vercel)]
+        TG[[Telegram Cloud]]
+    end
+
+    User --> UI
+    UI --> API
+    API --> Meta
+    
+    %% Upload Flow
+    UI -- "1. Upload Request" --> API
+    API -- "2. Assign Worker" --> UI
+    UI -- "3. Upload File" --> Worker1
+    Worker1 -- "4. Commit to Storage" --> TG
+    TG -.->|Webhook Update| Bot
+    Bot --> API
+    
+    %% Stream Flow
+    UI -- "Request File URL" --> API
+    API -- "Generate Signed Link" --> UI
+    UI -- "Direct Stream" --> TG
+```
+
+### Key Design Decisions
+
+```markdown
+#### 1. Dedicated FastAPI Worker
+The system utilizes a **dedicated FastAPI worker** deployed on Render to handle the complexities of the MTProto protocol.
+- **Session Stability**: Maintains persistent connections to Telegram's datacenters, avoiding the overhead of frequent re-authentication.
+- **Traffic Regulation**: Centralizes API calls to strictly adhere to Telegram's rate limits and
+
+```markdown
+prevent account flagging.
+
+#### 2. Hybrid Thumbnail Generation
+To handle media previews efficiently without a GPU-heavy backend, the system offloads processing to the edge.
+- **Client-Side Generation**: Thumbnails are created directly in the browser, ensuring immediate previews without server-side overhead.
+- **Multi-Target Storage**: Supports persisting thumbnails to Telegram's infrastructure or external CDNs like Cloudinary or ImgBB for high-performance caching.
+
+#### 3. Virtual File System (VFS)
+The file system is a **Directed Acyclic Graph (DAG)** stored in MongoDB.
+- Allows for instant "moves" and "renames" (O(1) complexity) by updating parent pointers rather than moving data.
+- Supports **Shared Albums** and collaborative folders without duplicating underlying data blobs.
+
+---
+
+## 🚀 Technical Highlights & Solved Problems
+
+### ⚡ Bandwidth Optimization
+```markdown
+**Problem**: Streaming large files (up to 4GB) through a standard VPS would exceed bandwidth limits and cause memory overflows.
+**Solution**: Implemented a **hybrid chunked streaming** strategy. Files under 20MB are fetched via the Telegram Bot API for low-latency access. Larger files are served through a dedicated worker that streams data in manageable chunks, preventing high load on both the worker and Telegram's infrastructure. This approach ensures the system remains compatible with the free-tier resource limits of hosting platforms.
+```
+
+### 🔄 State Synchronization
+**Problem**: Start-up latency when syncing thousands of files.
+**Solution**: Implemented an **Optimistic UI** with a background reconciliation queue. The UI updates instantly, while a background worker syncs the state with Telegram. If a drift is detected (e.g., file deleted on Telegram), the system self-heals by reconciling the MongoDB state.
+
+### �️ Security & Privacy
+- **Isolation**: Each user's data is stored in a private, dedicated Telegram channel created programmatically.
+- **Encryption**: File metadata and folder structure are essentially encrypted by obscurity; without the MongoDB mapping, the raw data in Telegram is just an unstructured stream of random files.
+
+---
+
+## �️ Technology Stack Breakdown
+
+| Layer | Technology | Role |
+|-------|------------|------|
+| **Core Service** | **FastAPI (Python)** | High-performance async API handling parallel requests. |
+| **Data Layer** | **MongoDB & Motor** | Async document storage for flexible schema evolution. |
+| **Client** | **React 19 + TypeScript** | Type-safe, component-based UI with optimistic state management. |
+| **Styling** | **Tailwind CSS + Shadcn** | Modern, accessible, and responsive design system. |
+| **Protocol** | **MTProto** | Direct interaction with Telegram's binary protocol for maximum speed. |
+
+---
+
+## � Future Scalability
+- **Sharding**: User data is already logically isolated by channel, making database sharding trivial for future scale.
+- **Edge Caching**: Investigating the use of Service Workers to cache frequently accessed file chunks locally for offline access.
