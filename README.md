@@ -21,6 +21,17 @@ Standard cloud storage (S3, GCS) becomes prohibitively expensive at scale. The c
 
 ---
 
+## 📸 Platform Screenshots
+
+### Private Repository — Proof of Work
+
+> The source code is maintained in a private GitHub repository. The screenshot below confirms active development, commit history, and repository structure.
+
+![Private Repository](https://res.cloudinary.com/dpmz5l34n/image/upload/v1773822860/Screenshot_2026-03-18_140406_h3qzzv.png)
+
+*Active private repository with full commit history, branch structure, and CI configuration.*
+
+---
 ## 🏗️ System Architecture
 
 The system uses a **decoupled metadata architecture**. The "filesystem" structure exists only in MongoDB, while the actual data blobs are distributed across Telegram's global CDN.
